@@ -1,3 +1,10 @@
+"""import libraries :
+        cv2:for take picture and  edit on it
+        medipipe:for detect hands
+        time:for make delay on typing (fix DDDDDDD----> D)
+        cvzone:for draw buttons
+        pynput:for type in windows
+"""
 import cv2
 import mediapipe as mp
 import time
@@ -6,9 +13,9 @@ import cvzone
 from pynput.keyboard import Controller
 
 # Webcam setup
-webcam = cv2.VideoCapture(0)
-webcam.set(3, 1280)  # Webcam resolution
-webcam.set(4, 720)   # Webcam resolution
+webcam = cv2.VideoCapture(0)#teke picture from webcam
+webcam.set(3, 1280)         # Webcam resolution
+webcam.set(4, 720)          # Webcam resolution
 
 # Hand tracking setup
 my_hands = mp.solutions.hands.Hands()
@@ -41,7 +48,7 @@ for i in range(len(keys)):
 # Main loop
 while True:
     # Read frame from webcam
-    _, image = webcam.read()
+    _ , image = webcam.read()
     image = cv2.flip(image, 1)  # Mirror the video
 
     # Process the image to detect hands
@@ -61,19 +68,19 @@ while True:
                     x1 = x
                     y1 = y
                 if id == 12:
-                    cv2.circle(image, center=(x, y), radius=8, color=(0, 0, 250))
+                    cv2.circle(image, center=(x, y), radius=8, color=(255, 0, 250))
                     x2 = x
                     y2 = y
-        dist = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) // 4
+        dist = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2) // 4    #calculate distance between index and middle finger
         cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 5)
-        print(f"{dist}____{x2}_____{y2}")
+        print(f"{dist}____{x2}_____{y2}")                       #print distance and x and y of middle finger
 
         # Check if (x2, y2) is inside a button and dist is less than 7
         for i, button in enumerate(buttonList):
             if (button.pos[0] - 50 <= x2 <= button.pos[0] + 50 and
                 button.pos[1] - 50 <= y2 <= button.pos[1] + 50 and
                 dist < 7):
-                finalText += keys[i // 10][i % 10]  # Add the corresponding character to finalText
+                keyboard.press(button.text) #write character in windows
                 time.sleep(0.15)
 
     # Draw buttons on the image
@@ -81,14 +88,10 @@ while True:
         x, y = button.pos
         w, h = button.size
         cvzone.cornerRect(image, (x, y, w, h), 20, rt=0)
-        cv2.rectangle(image, button.pos, (x + w, y + h), (100, 0, 0), cv2.FILLED)
+        cv2.rectangle(image, button.pos, (x + w, y + h), (200, 0, 0), cv2.FILLED)
         cv2.putText(image, button.text, (x + 20, y + 65), cv2.FONT_HERSHEY_PLAIN, 4, (255, 255, 255), 4)
 
-    # Draw finalText in a textbox
-    cv2.rectangle(image, (50, 350), (700, 450), (175, 0, 175), cv2.FILLED)
-    cv2.putText(image, finalText, (60, 430), cv2.FONT_HERSHEY_PLAIN, 5, (255, 255, 255), 5)
-
-    # Show the virtual keyboard
+    # Show the virtual keyboard(app window)
     cv2.imshow("Virtual Keyboard", image)
 
     # Exit the program if 'q' is pressed
